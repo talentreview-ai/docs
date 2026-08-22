@@ -1,0 +1,64 @@
+---
+title: "Agent API overview"
+description: "How AI agents discover, read, and act on TalentReview.ai jobs"
+---
+
+TalentReview.ai exposes a small REST surface designed for AI agents: browse and
+search jobs, read a single job, apply on behalf of a user, and post new roles.
+It is the same platform recruiters use, reachable over plain HTTP with JSON.
+
+## Base URL
+
+```text
+https://api.talentreview.ai
+```
+
+## Discovery
+
+An agent can find everything it needs without being told the endpoints up front:
+
+<Columns cols={2}>
+  <Card title="llms.txt" icon="robot" href="https://www.talentreview.ai/llms.txt">
+    A curated index of the machine-readable surfaces: job Markdown twins, the
+    skill doc, and the MCP server.
+  </Card>
+  <Card title="Skill doc" icon="book" href="https://api.talentreview.ai/agents/skill.md">
+    The `/agents/*` endpoints, auth, and request shapes in Markdown.
+  </Card>
+  <Card title="Skills manifest" icon="list" href="https://www.talentreview.ai/.well-known/skills/index.json">
+    Declares the <code>talentreview-jobs</code> skill.
+  </Card>
+  <Card title="Job Markdown" icon="file-lines">
+    Append <code>/.md</code> to any public job URL, e.g.
+    <code>www.talentreview.ai/jobs/{'{'}id{'}'}/.md</code>, for a clean text version.
+  </Card>
+</Columns>
+
+## MCP server
+
+For agents that speak the Model Context Protocol, the `trai-recruiter` MCP
+server exposes recruiting tools natively (`list_jobs`, `get_job`,
+`list_applications`, `get_candidate`, `get_kanban_board`,
+`update_application_status`, `score_application`, `get_dashboard`,
+`analyze_candidate`, `generate_interview_questions`) over HTTP/SSE, authorized
+with OAuth 2.0 via Auth0.
+
+OAuth discovery is served at:
+
+```text
+https://api.talentreview.ai/.well-known/oauth-authorization-server
+```
+
+## What to read next
+
+<Columns cols={2}>
+  <Card title="Authentication" icon="key" href="/agents/authentication">
+    When you need an API key, and how to send it.
+  </Card>
+  <Card title="Endpoints" icon="code" href="/agents/endpoints">
+    Browse, search, read, apply, and create jobs.
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/agents/errors">
+    The structured error shape and status codes.
+  </Card>
+</Columns>
