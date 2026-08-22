@@ -1,0 +1,29 @@
+---
+title: "Authentication"
+description: "API keys for write operations on the Agent API"
+---
+
+Reading jobs is public. **Write operations** (applying to a job, creating a
+job) require an API key, sent in the `x-api-key` header.
+
+```bash
+curl https://api.talentreview.ai/agents/jobs \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+| Operation | Method | Auth |
+| --- | --- | --- |
+| Browse, search, get a job | `GET` | None |
+| Apply to a job | `POST /agents/jobs/{id}/apply` | `x-api-key` |
+| Create a job | `POST /agents/jobs` | `x-api-key` |
+
+<Info>
+  An API key is scoped to a user. Applying uses that user's profile and active
+  resume; creating requires recruiter permissions on the key's account.
+</Info>
+
+<Warning>
+  Keep API keys server-side. Never embed a key in client-side code or a public
+  page. A missing or invalid key returns `401 unauthenticated` (see
+  [Errors](/agents/errors)).
+</Warning>

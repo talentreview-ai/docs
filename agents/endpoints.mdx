@@ -1,0 +1,134 @@
+---
+title: "Endpoints"
+description: "Browse, search, read, apply to, and create jobs"
+---
+
+All responses are JSON. Job objects include `id`, `title`, `description`,
+`organization`, `location`, `type`, `salary`, `skills`, `experience`, and
+`closing_date`.
+
+## Browse jobs
+
+Active listings with optional filters.
+
+```text
+GET /agents/jobs
+```
+
+<ParamField query="organization_id" type="string">Filter by organization</ParamField>
+<ParamField query="location_id" type="string">Filter by location</ParamField>
+<ParamField query="job_type" type="string">One of `full_time`, `part_time`, `contract`, `internship`, `freelance`, `volunteer`</ParamField>
+<ParamField query="experience" type="string">Filter by experience level</ParamField>
+<ParamField query="hashtags" type="string">Comma-separated tags</ParamField>
+<ParamField query="project_id" type="string">Filter by project</ParamField>
+<ParamField query="page" type="integer" default="1">Page number</ParamField>
+<ParamField query="limit" type="integer" default="10">Results per page</ParamField>
+
+```bash
+curl "https://api.talentreview.ai/agents/jobs?job_type=full_time&limit=5"
+```
+
+## Search jobs
+
+Keyword search with advanced filters.
+
+```text
+GET /agents/jobs/search?q={query}
+```
+
+<ParamField query="q" type="string" required>Search query</ParamField>
+<ParamField query="job_types" type="string">Comma-separated job types</ParamField>
+<ParamField query="location_ids" type="string">Comma-separated location IDs</ParamField>
+<ParamField query="experiences" type="string">Comma-separated experience levels</ParamField>
+<ParamField query="skills" type="string">Comma-separated skills</ParamField>
+<ParamField query="organization_ids" type="string">Comma-separated organization IDs</ParamField>
+<ParamField query="page" type="integer" default="1">Page number</ParamField>
+<ParamField query="limit" type="integer" default="10">Results per page</ParamField>
+
+```bash
+curl "https://api.talentreview.ai/agents/jobs/search?q=backend%20engineer&skills=Go"
+```
+
+## Get a job
+
+```text
+GET /agents/jobs/{job_id}
+```
+
+```bash
+curl "https://api.talentreview.ai/agents/jobs/01H..."
+```
+
+<Note>
+  `job_id` must be a well-formed job id. A malformed or unknown id returns
+  `404 not_found` (see [Errors](/agents/errors)).
+</Note>
+
+## Apply to a job
+
+Submits an application using the authenticated user's profile and active resume.
+
+```text
+POST /agents/jobs/{job_id}/apply
+```
+
+Requires an `x-api-key`. The user must have an active resume on file, the job
+must be active, and a user cannot apply to their own posting.
+
+```bash
+curl -X POST "https://api.talentreview.ai/agents/jobs/01H.../apply" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Create a job
+
+Post a new role. Requires an `x-api-key` with recruiter permissions.
+
+```text
+POST /agents/jobs
+```
+
+**Required fields:** `title`, `organization_id`, `location_id`, `type`, `salary`.
+
+```bash
+curl -X POST "https://api.talentreview.ai/agents/jobs" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Senior Backend Engineer",
+    "description": "Build scalable APIs and services",
+    "department": "Engineering",
+    "location_id": "01H...",
+    "type": "full_time",
+    "salary": "120000-160000",
+    "experience": "5+ years",
+    "skills": ["Go", "PostgreSQL", "Kubernetes"],
+    "organization_id": "01H...",
+    "tags": ["backend"],
+    "responsibilities": ["Design and build microservices"],
+    "closing_date": "2026-12-31"
+  }'
+```
+
+## Resolving organization and location IDs
+
+`organization_id` and `location_id` are required to create a job and useful as
+filters. Fetch valid ids from the Connect-RPC services:
+
+<CodeGroup>
+```bash List organizations
+curl -X POST "https://api.talentreview.ai/organization.v1.OrganizationService/List" \
+  -H "Content-Type: application/json" \
+  -d '{"pagination": {"pagination": {"page": 1, "limit": 50}}}'
+```
+
+```bash List locations
+curl -X POST "https://api.talentreview.ai/location.v1.LocationService/List" \
+  -H "Content-Type: application/json" \
+  -d '{"pagination": {"pagination": {"page": 1, "limit": 50}}}'
+```
+</CodeGroup>
+
+Organizations return `id`, `name`, `website`, `industry`, `size`, and more.
+Locations return `id`, `name`, `is_remote`, `workplace_type`, and a nested
+`address`.

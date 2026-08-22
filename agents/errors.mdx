@@ -1,0 +1,45 @@
+---
+title: "Errors"
+description: "The structured error shape and status codes the Agent API returns"
+---
+
+Every error response is JSON with a machine-readable `code`, a human `message`,
+and, where useful, a `hint` on how to resolve it. The HTTP status matches the
+`code`.
+
+```json
+{
+  "code": "not_found",
+  "message": "job not found",
+  "hint": "Verify the resource id; list resources first to get valid ids."
+}
+```
+
+<ResponseField name="code" type="string">
+  Stable machine-readable identifier. Branch on this, not on the message text.
+</ResponseField>
+<ResponseField name="message" type="string">
+  Human-readable description of what went wrong.
+</ResponseField>
+<ResponseField name="hint" type="string">
+  Optional suggestion for how to fix the request.
+</ResponseField>
+
+## Status codes
+
+| HTTP | `code` | When |
+| --- | --- | --- |
+| 400 | `invalid_argument` | A parameter or body field is missing or malformed |
+| 401 | `unauthenticated` | Missing or invalid `x-api-key` on a write operation |
+| 403 | `permission_denied` | The key lacks access to the resource |
+| 404 | `not_found` | Unknown or malformed resource id, or unknown endpoint |
+| 405 | `method_not_allowed` | Wrong HTTP method for the endpoint |
+| 409 | `already_exists` | The resource already exists |
+| 429 | `rate_limited` | Too many requests; slow down and retry |
+| 500 | `internal` | An unexpected server error; retry later |
+
+<Tip>
+  A malformed job id (for example a non-id string) returns `404 not_found`
+  rather than a server error, so you can treat "bad id" and "missing job" the
+  same way.
+</Tip>
