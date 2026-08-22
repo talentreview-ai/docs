@@ -1,0 +1,106 @@
+---
+title: "SDK & CLI"
+description: "The talentreview npm package: a typed TypeScript client and command-line tool for the Agent API"
+---
+
+[`talentreview`](https://www.npmjs.com/package/talentreview) is the official
+TypeScript SDK and CLI for the Agent API. Reading jobs is public; applying and
+creating jobs need an [API key](/agents/authentication).
+
+## Install
+
+```bash
+npm install talentreview
+```
+
+Or run the CLI without installing:
+
+```bash
+npx talentreview jobs search "backend engineer"
+```
+
+Requires Node.js 18+.
+
+## SDK
+
+```ts
+import { TalentReview, TalentReviewError } from "talentreview";
+
+// apiKey is only needed for writes; falls back to TALENTREVIEW_API_KEY.
+const trai = new TalentReview({ apiKey: process.env.TALENTREVIEW_API_KEY });
+
+// Public reads
+const { items } = await trai.jobs.search({ q: "senior backend engineer", skills: "Go,Kubernetes" });
+const job = await trai.jobs.get(items[0].id);
+console.log(job.info.title, job.info.location?.name);
+
+// Writes (require an API key)
+try {
+  const created = await trai.jobs.create({
+    title: "Senior Backend Engineer",
+    organization_id: "01H...",
+    location_id: "01H...",
+    type: "full_time",
+    salary: "120000-160000",
+    skills: ["Go", "PostgreSQL"],
+  });
+  console.log(created.id ?? created.job?.info?.id);
+} catch (err) {
+  if (err instanceof TalentReviewError) {
+    // Branch on the machine-readable code, not the message.
+    console.error(err.code, err.status, err.hint);
+  }
+}
+```
+
+### Methods
+
+| Method | Auth | Returns |
+| --- | --- | --- |
+| `jobs.list(params?)` | – | `{ jobs, pagination }` |
+| `jobs.search(params)` | – | `{ total_count, items }` |
+| `jobs.get(id)` | – | a `Job` (fields under `info`) |
+| `jobs.apply(id)` | API key | an `Application` |
+| `jobs.create(body)` | API key | the created job / id |
+
+<Note>
+  The three read endpoints return different shapes: `list` and `get` nest job
+  fields under `info` (with `organization`/`location` as objects), while
+  `search` returns flatter `items` with a `job_details` object. The SDK types
+  reflect this.
+</Note>
+
+Errors reject with a `TalentReviewError` carrying `code`, `status`, `message`,
+and an optional `hint`. See [Errors](/agents/errors) for the codes.
+
+## CLI
+
+The package installs a `talentreview` binary (also aliased `trai`).
+
+```bash
+# Public
+talentreview jobs list --type full_time --limit 5
+talentreview jobs search "product designer" --skills Figma
+talentreview jobs get 01H... --json
+talentreview jobs get 01H... --markdown
+
+# Writes (need a key)
+export TALENTREVIEW_API_KEY=sk_...
+talentreview jobs apply 01H...
+talentreview jobs create --title "Backend Engineer" --org 01H... --location 01H... --type full_time --salary "120k-160k"
+```
+
+Global flags: `--json` (raw JSON, for agents and scripts), `--api-key <key>`,
+`--base-url <url>`.
+
+## Configuration
+
+| Env var | Purpose |
+| --- | --- |
+| `TALENTREVIEW_API_KEY` | API key for write operations |
+| `TALENTREVIEW_BASE_URL` | Override the API base URL (default `https://api.talentreview.ai`) |
+
+## Source
+
+The package is open source (MIT) at
+[github.com/talentreview-ai/sdk](https://github.com/talentreview-ai/sdk).

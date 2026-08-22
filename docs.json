@@ -29,7 +29,8 @@
               "agents/overview",
               "agents/authentication",
               "agents/endpoints",
-              "agents/errors"
+              "agents/errors",
+              "agents/sdk"
             ]
           }
         ]
