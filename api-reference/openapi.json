@@ -1,0 +1,200 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentReviewAI Agent API",
+    "description": "REST endpoints for AI agents to browse, search, read, apply to, and create jobs on TalentReview.ai.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://api.talentreview.ai" }
+  ],
+  "security": [],
+  "paths": {
+    "/agents/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "summary": "Browse jobs",
+        "description": "List active job postings with optional filters.",
+        "parameters": [
+          { "name": "organization_id", "in": "query", "schema": { "type": "string" }, "description": "Filter by organization" },
+          { "name": "location_id", "in": "query", "schema": { "type": "string" }, "description": "Filter by location" },
+          { "name": "job_type", "in": "query", "schema": { "type": "string", "enum": ["full_time", "part_time", "contract", "internship", "freelance", "volunteer"] }, "description": "Filter by employment type" },
+          { "name": "experience", "in": "query", "schema": { "type": "string" }, "description": "Filter by experience level" },
+          { "name": "hashtags", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated tags" },
+          { "name": "project_id", "in": "query", "schema": { "type": "string" }, "description": "Filter by project" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of jobs",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobList" } } }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createJob",
+        "summary": "Create a job",
+        "description": "Post a new job. Requires an API key with recruiter permissions.",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateJobRequest" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "The created job",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/agents/jobs/search": {
+      "get": {
+        "operationId": "searchJobs",
+        "summary": "Search jobs",
+        "description": "Search active jobs by keyword with optional filters.",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Search query" },
+          { "name": "job_types", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated job types" },
+          { "name": "location_ids", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated location IDs" },
+          { "name": "experiences", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated experience levels" },
+          { "name": "skills", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated skills" },
+          { "name": "organization_ids", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated organization IDs" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching jobs",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobList" } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/agents/jobs/{jobId}": {
+      "get": {
+        "operationId": "getJob",
+        "summary": "Get a job",
+        "description": "Retrieve full details for a single job.",
+        "parameters": [
+          { "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/agents/jobs/{jobId}/apply": {
+      "post": {
+        "operationId": "applyToJob",
+        "summary": "Apply to a job",
+        "description": "Submit an application using the authenticated user's profile and active resume. Requires an API key.",
+        "security": [{ "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created application",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Application" } } }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "x-api-key" }
+    },
+    "responses": {
+      "Error": {
+        "description": "Structured error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Structured error with a machine-readable code and a resolution hint.",
+        "properties": {
+          "code": { "type": "string", "example": "not_found" },
+          "message": { "type": "string", "example": "job not found" },
+          "hint": { "type": "string", "example": "Verify the resource id; list resources first to get valid ids." }
+        },
+        "required": ["code", "message"]
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "organization": { "type": "string" },
+          "location": { "type": "string" },
+          "type": { "type": "string" },
+          "salary": { "type": "string" },
+          "experience": { "type": "string" },
+          "education": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "closing_date": { "type": "string" }
+        }
+      },
+      "JobList": {
+        "type": "object",
+        "properties": {
+          "jobs": { "type": "array", "items": { "$ref": "#/components/schemas/Job" } },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "current_page": { "type": "integer" },
+              "total_pages": { "type": "integer" },
+              "total_items": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "CreateJobRequest": {
+        "type": "object",
+        "required": ["title", "organization_id", "location_id", "type", "salary"],
+        "properties": {
+          "title": { "type": "string" },
+          "organization_id": { "type": "string" },
+          "location_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["full_time", "part_time", "contract", "internship", "freelance", "volunteer"] },
+          "salary": { "type": "string" },
+          "description": { "type": "string" },
+          "department": { "type": "string" },
+          "experience": { "type": "string" },
+          "education": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "team": { "type": "string" },
+          "reporting_to": { "type": "string" },
+          "closing_date": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "responsibilities": { "type": "array", "items": { "type": "string" } },
+          "resume_score_threshold": { "type": "number" },
+          "generate_screening": { "type": "boolean" },
+          "project_id": { "type": "string" }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "job_id": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      }
+    }
+  }
+}
