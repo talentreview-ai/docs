@@ -40,14 +40,12 @@ For agents that speak the Model Context Protocol, the `trai-recruiter` MCP
 server exposes recruiting tools natively (`list_jobs`, `get_job`,
 `list_applications`, `get_candidate`, `get_kanban_board`,
 `update_application_status`, `score_application`, `get_dashboard`,
-`analyze_candidate`, `generate_interview_questions`) over HTTP/SSE, authorized
-with OAuth 2.0 via Auth0.
+`analyze_candidate`, `generate_interview_questions`) over SSE, authorized with
+OAuth 2.0 via Auth0.
 
-OAuth discovery is served at:
-
-```text
-https://api.talentreview.ai/.well-known/oauth-authorization-server
-```
+- SSE endpoint: `https://mcp.talentreviewai.com/sse`
+- Manifest: [`/.well-known/mcp.json`](https://www.talentreview.ai/.well-known/mcp.json)
+- OAuth discovery: `https://mcp.talentreviewai.com/.well-known/oauth-authorization-server`
 
 ## What to read next
 
