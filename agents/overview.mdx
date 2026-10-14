@@ -43,9 +43,17 @@ server exposes recruiting tools natively (`list_jobs`, `get_job`,
 `analyze_candidate`, `generate_interview_questions`) over SSE, authorized with
 OAuth 2.0 via Auth0.
 
-- SSE endpoint: `https://mcp.talentreviewai.com/sse`
+- SSE endpoint: `https://mcp.talentreview.ai/sse`
 - Manifest: [`/.well-known/mcp.json`](https://www.talentreview.ai/.well-known/mcp.json)
-- OAuth discovery: `https://mcp.talentreviewai.com/.well-known/oauth-authorization-server`
+- OAuth discovery: `https://mcp.talentreview.ai/.well-known/oauth-authorization-server`
+
+Candidates can connect their own assistant to the `trai-candidate` MCP server to
+read and edit their CV and download it as a PDF (`list_my_resumes`,
+`get_my_resume`, `update_my_resume`, `set_active_resume`,
+`download_my_resume_pdf`). It only sees the signed-in candidate's own CV, and
+every edit is saved as a new version.
+
+- Endpoint (Streamable HTTP): `https://mcp.talentreview.ai/candidate/mcp`
 
 ## What to read next
 
