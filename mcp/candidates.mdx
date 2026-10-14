@@ -1,0 +1,102 @@
+---
+title: "MCP for candidates"
+description: "The trai-candidate server: read and edit your CV, and download it as a PDF, from your assistant"
+---
+
+The `trai-candidate` server lets your assistant work on your TalentReview.ai CV.
+Ask it to tighten your summary, add a new job or tailor your skills to a role,
+then download the result as a PDF. It can only see and change your own CV.
+
+```text
+https://mcp.talentreview.ai/candidate/mcp
+```
+
+You'll also find this URL, with a copy button, under **Settings → Assistants**
+in the app.
+
+## Connect
+
+<Tabs>
+  <Tab title="Claude">
+    Open **Settings → Connectors**, choose **Add custom connector**, paste the
+    URL above and sign in when asked.
+  </Tab>
+  <Tab title="ChatGPT">
+    Add a custom connector with the URL above. ChatGPT only allows custom
+    connectors with developer mode turned on.
+  </Tab>
+  <Tab title="Cursor">
+    Add this to your MCP settings, then sign in when Cursor asks:
+
+    ```json
+    {
+      "mcpServers": {
+        "talentreview": {
+          "url": "https://mcp.talentreview.ai/candidate/mcp"
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Tools
+
+| Tool | What it does | Arguments |
+| --- | --- | --- |
+| `list_my_resumes` | Your CV types and every saved version, newest first, with the active one marked | none |
+| `get_my_resume` | One version as structured JSON | `version_id` (default: your active CV) |
+| `update_my_resume` | Saves an edited CV as a new version | `sections` (required), `base_version_id`, `make_active` |
+| `set_active_resume` | Makes a saved version your active CV | `version_id` |
+| `download_my_resume_pdf` | A link to download a version as a PDF | `version_id` (default: your active CV) |
+
+## How edits work
+
+Nothing is ever overwritten. Every edit is saved as a **new version**, so you
+can always go back.
+
+- `update_my_resume` starts from your active CV (or `base_version_id`) and
+  replaces each section you send as a whole. Sections you leave out are copied
+  unchanged.
+- The new version does **not** become your active CV unless `make_active` is
+  true. Your active CV is the one recruiters see when you apply, so your
+  assistant should check with you first.
+- Versions saved this way are marked "Edited with an AI assistant" on your
+  [versions page](https://www.talentreview.ai/resume/versions).
+
+The sections and their fields:
+
+| Section | Fields |
+| --- | --- |
+| `basics` | `name`, `label` (job title), `email`, `phone`, `url`, `summary`, `location` (`city`, `region`, `countryCode`), `profiles` (`network`, `username`, `url`) |
+| `work` | `company`, `position`, `location`, `startDate`, `endDate`, `summary`, `highlights` |
+| `education` | `institution`, `area`, `studyType`, `location`, `startDate`, `endDate`, `score`, `courses` |
+| `projects` | `name`, `description`, `url`, `keywords` |
+| `skills` | `name`, `level`, `keywords` |
+| `softSkills` | `name` |
+| `certificates` | `title`, `date`, `issuer`, `score`, `url` |
+| `languages` | `language`, `fluency` |
+| `volunteer` | `organization`, `position`, `url`, `startDate`, `endDate`, `summary`, `highlights` |
+| `interests` | `name`, `keywords` |
+
+Dates are free text, such as `2021-03` or `March 2021`. Leave `endDate` empty
+for a current role. A section with an unknown field or the wrong type is
+rejected and nothing is saved.
+
+## Downloading a PDF
+
+`download_my_resume_pdf` returns a link that works **once** and expires after
+**15 minutes**. Open it in your browser to download the file. If it has
+expired, ask your assistant for a new one.
+
+## Limits
+
+- 30 saves per hour.
+- Up to 256 KB of sections per save.
+
+## Things to ask
+
+- "Read my CV and suggest a shorter, sharper summary."
+- "Add my new role at Acme, started March 2025, and save it as a new version."
+- "Tailor my skills section to this job description, but don't make it active yet."
+- "Give me a PDF of my active CV."
