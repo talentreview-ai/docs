@@ -1,0 +1,49 @@
+---
+title: "MCP overview"
+description: "Connect Claude, ChatGPT, Cursor or any MCP client to TalentReview.ai"
+---
+
+TalentReview.ai runs two [Model Context Protocol](https://modelcontextprotocol.io)
+servers. Add one to your assistant as a connector, sign in with your
+TalentReview.ai account, and the assistant can work with your data directly.
+
+| Server | For | Endpoint | Transport |
+| --- | --- | --- | --- |
+| `trai-recruiter` | Recruiters: jobs, applications, the hiring pipeline | `https://mcp.talentreview.ai/sse` | SSE |
+| `trai-candidate` | Candidates: your own CV and its PDF | `https://mcp.talentreview.ai/candidate/mcp` | Streamable HTTP |
+
+<Columns cols={2}>
+  <Card title="Recruiters" icon="briefcase" href="/mcp/recruiters">
+    Review applications, move candidates through the pipeline and generate
+    interview questions.
+  </Card>
+  <Card title="Candidates" icon="user" href="/mcp/candidates">
+    Read and edit your CV, switch versions and download a PDF.
+  </Card>
+</Columns>
+
+## Signing in
+
+Both servers use OAuth 2.0. The first time your assistant calls a tool, it opens
+a TalentReview.ai sign-in page; after you sign in, it gets an access token.
+
+- A token lasts 24 hours. After that, or after we deploy a new version of the
+  server, your assistant asks you to sign in again.
+- Each tool only works on the signed-in account's own data.
+- The recruiter server also accepts an [API key](/agents/authentication) as a
+  bearer token (`Authorization: Bearer YOUR_API_KEY`), for agents that can't
+  open a browser.
+
+## Discovery
+
+Clients that support discovery need only the endpoint URL. For the rest:
+
+- OAuth server metadata: `https://mcp.talentreview.ai/.well-known/oauth-authorization-server`
+- Protected resource metadata for the candidate server:
+  `https://mcp.talentreview.ai/.well-known/oauth-protected-resource/candidate/mcp`
+- Manifest: [`https://www.talentreview.ai/.well-known/mcp.json`](https://www.talentreview.ai/.well-known/mcp.json)
+
+<Note>
+  The older host `mcp.talentreviewai.com` still works for connectors set up
+  before the move. Use `mcp.talentreview.ai` for anything new.
+</Note>

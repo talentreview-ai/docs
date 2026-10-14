@@ -1,0 +1,67 @@
+---
+title: "MCP for recruiters"
+description: "The trai-recruiter server: jobs, applications and the hiring pipeline from your assistant"
+---
+
+The `trai-recruiter` server gives your assistant the same view of your hiring
+pipeline you see in the dashboard: your jobs, who applied, where each candidate
+stands, and AI analysis of each application.
+
+```text
+https://mcp.talentreview.ai/sse
+```
+
+## Connect
+
+<Tabs>
+  <Tab title="Claude">
+    Open **Settings → Connectors**, choose **Add custom connector**, paste the
+    URL above and sign in when asked.
+  </Tab>
+  <Tab title="Cursor">
+    Add this to your MCP settings, then sign in when Cursor asks:
+
+    ```json
+    {
+      "mcpServers": {
+        "talentreview-recruiter": {
+          "url": "https://mcp.talentreview.ai/sse"
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="API key">
+    For agents without a browser, send an [API key](/agents/authentication) as
+    a bearer token on the SSE connection:
+
+    ```text
+    Authorization: Bearer YOUR_API_KEY
+    ```
+  </Tab>
+</Tabs>
+
+## Tools
+
+| Tool | What it does | Arguments |
+| --- | --- | --- |
+| `list_jobs` | Your jobs with status and basic stats | `status` (draft, active, inactive, closed), `project_id`, `page`, `limit` (max 100) |
+| `get_job` | One job: description, requirements, application stats | `job_id` |
+| `list_applications` | Applications for a job, with names, statuses and match scores | `job_id`, `page`, `limit` (max 100) |
+| `get_candidate` | A candidate's profile, timeline and match analysis | `application_id` |
+| `get_kanban_board` | Every candidate by pipeline stage | `page`, `limit` (max 200) |
+| `update_application_status` | Move a candidate to another stage | `application_id`, `status` (new, screening, interview, technical, offer, hired, rejected), `notes` |
+| `score_application` | Set an application's match score | `application_id`, `score` (0 to 100) |
+| `get_dashboard` | Totals, open positions, interviews scheduled, hiring rate, trends | `organization_id` |
+| `analyze_candidate` | AI fit analysis: score, skills, experience, strengths, concerns | `application_id` |
+| `generate_interview_questions` | Interview questions based on the CV and the job | `application_id`, `num_questions` (max 10), `focus_area` (technical, behavioral, situational) |
+
+`update_application_status` and `score_application` change data your team sees.
+Most assistants ask before calling them.
+
+## Things to ask
+
+- "Which of my active jobs got new applications this week?"
+- "Show the top five applicants for the backend role and why they match."
+- "Move Priya to the technical stage and note that she passed the screen."
+- "Write six technical interview questions for this candidate."

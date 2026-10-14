@@ -32,6 +32,14 @@
               "agents/errors",
               "agents/sdk"
             ]
+          },
+          {
+            "group": "MCP",
+            "pages": [
+              "mcp/overview",
+              "mcp/recruiters",
+              "mcp/candidates"
+            ]
           }
         ]
       },
