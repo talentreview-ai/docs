@@ -32,6 +32,12 @@
               "agents/errors",
               "agents/sdk"
             ]
+          },
+          {
+            "group": "MCP server",
+            "pages": [
+              "mcp"
+            ]
           }
         ]
       },
