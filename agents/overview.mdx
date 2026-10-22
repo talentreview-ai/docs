@@ -36,42 +36,12 @@ An agent can find everything it needs without being told the endpoints up front:
 
 ## MCP server
 
-Recruiters can connect Claude, ChatGPT or any other MCP client to the
-`trai-recruiter` MCP server and work their hiring pipeline in plain English.
-You sign in with your TalentReview account (OAuth 2.0). API keys don't work on
-this server.
-
-- Endpoint (Streamable HTTP): `https://mcp.talentreview.ai/mcp`
-- Manifest: [`/.well-known/mcp.json`](https://www.talentreview.ai/.well-known/mcp.json)
-- OAuth discovery: `https://mcp.talentreview.ai/.well-known/oauth-authorization-server`
-
-| Area | Tools |
-| --- | --- |
-| Jobs | `list_jobs`, `get_job` |
-| Applicants | `list_applicants`, `get_applicant`, `update_applicant` |
-| AI analysis | `analyse_applicant`, `analyse_all_applicants`, `get_analysis_progress`, `get_allowances` |
-| Talent search | `search_talent`, `invite_to_apply` |
-| Files | `download_cv`, `export_applicants_csv` |
-| Dashboard | `get_dashboard` |
-
-Analyses and talent searches count against your plan's monthly allowance, the
-same as in the dashboard. `analyse_all_applicants` needs a paid plan.
-`download_cv` and `export_applicants_csv` return a link that works once and
-expires after 15 minutes. Talent search results never include a candidate's
-email or phone; use `invite_to_apply` instead.
-
-<Note>
-The old SSE endpoint, `https://mcp.talentreview.ai/sse`, has been retired. If
-your connector still uses it, remove it and add `https://mcp.talentreview.ai/mcp`.
-</Note>
-
-Candidates can connect their own assistant to the `trai-candidate` MCP server to
-read and edit their CV and download it as a PDF (`list_my_resumes`,
-`get_my_resume`, `update_my_resume`, `set_active_resume`,
-`download_my_resume_pdf`). It only sees the signed-in candidate's own CV, and
-every edit is saved as a new version.
-
-- Endpoint (Streamable HTTP): `https://mcp.talentreview.ai/candidate/mcp`
+Recruiters and candidates can connect Claude, ChatGPT, Cursor, Codex or any
+other MCP client and sign in with their TalentReview account. Recruiters get
+their jobs, applicants, AI analysis, talent search and exports at
+`https://mcp.talentreview.ai/mcp`. Candidates can read and edit their CV at
+`https://mcp.talentreview.ai/candidate/mcp`. See [MCP server](/mcp) for setup
+and the full tool list.
 
 ## What to read next
 

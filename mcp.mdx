@@ -1,0 +1,124 @@
+---
+title: "MCP server"
+description: "Connect Claude, ChatGPT, Cursor, Codex or VS Code to TalentReview. Sign in once, then work with jobs, applicants and CVs from the chat."
+---
+
+TalentReview runs two MCP servers, one for recruiters and one for candidates.
+Each has its own URL and its own sign-in. Both use Streamable HTTP and OAuth 2.0:
+your client opens a browser window, you sign in with your TalentReview account,
+and that's it. There is no API key to copy, and API keys are not accepted.
+
+| Server | Who it's for | URL |
+| --- | --- | --- |
+| `trai-recruiter` | Recruiters and hiring teams | `https://mcp.talentreview.ai/mcp` |
+| `trai-candidate` | Job seekers | `https://mcp.talentreview.ai/candidate/mcp` |
+
+The setup steps below use the recruiter URL. For the candidate server, swap in
+`https://mcp.talentreview.ai/candidate/mcp` and a different name, such as
+`talentreview-candidate`.
+
+## Connect your client
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http talentreview https://mcp.talentreview.ai/mcp
+    ```
+    Start Claude Code, type `/mcp`, pick `talentreview` and choose
+    **Authenticate**. Sign in in the browser window that opens.
+  </Tab>
+  <Tab title="Claude / ChatGPT">
+    In Claude, open **Settings → Connectors → Add custom connector**. In
+    ChatGPT, add it as a connector under **Settings → Apps**. Paste
+    `https://mcp.talentreview.ai/mcp`, click **Connect** and sign in. Then turn
+    the connector on in a chat.
+  </Tab>
+  <Tab title="Codex">
+    ```bash
+    codex mcp add talentreview --url https://mcp.talentreview.ai/mcp
+    codex mcp login talentreview
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Add this to `~/.cursor/mcp.json`, then open **Settings → MCP** and click
+    **Connect** next to `talentreview`.
+    ```json
+    {
+      "mcpServers": {
+        "talentreview": { "url": "https://mcp.talentreview.ai/mcp" }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="VS Code">
+    ```bash
+    code --add-mcp '{"name":"talentreview","type":"http","url":"https://mcp.talentreview.ai/mcp"}'
+    ```
+    Start the server from the MCP view and sign in.
+  </Tab>
+  <Tab title="Other">
+    Any client that speaks Streamable HTTP and MCP auth works. It finds the
+    authorization server from the `WWW-Authenticate` header on the first 401.
+    - OAuth discovery: `https://mcp.talentreview.ai/.well-known/oauth-authorization-server`
+    - Protected resource metadata: `https://mcp.talentreview.ai/.well-known/oauth-protected-resource/mcp`
+    - Manifest: [`/.well-known/mcp.json`](https://www.talentreview.ai/.well-known/mcp.json)
+  </Tab>
+</Tabs>
+
+## Recruiter tools
+
+| Area | Tool | What it does |
+| --- | --- | --- |
+| Jobs | `list_jobs` | Your jobs with their status and stats. |
+| | `get_job` | One job in full. |
+| Applicants | `list_applicants` | Applicants to a job, newest first, with match scores. |
+| | `get_applicant` | Contact details, notes, AI analysis and profile. |
+| | `update_applicant` | Move an applicant to another stage, add a note, or both. |
+| AI analysis | `analyse_applicant` | Score one applicant against the job: strengths, concerns and a recommendation. |
+| | `analyse_all_applicants` | Score every applicant to a job in the background. Paid plans. |
+| | `get_analysis_progress` | How far the latest bulk analysis has got. |
+| | `get_allowances` | Analyses and talent searches left this month. |
+| Talent search | `search_talent` | Find candidates from a plain-English brief. |
+| | `invite_to_apply` | Email a candidate an invitation to one of your active jobs. |
+| Files | `download_cv` | Link to an applicant's original CV or a PDF built from their resume. |
+| | `export_applicants_csv` | Link to a CSV of a job's applicants. |
+| Dashboard | `get_dashboard` | Totals, open roles, interviews and trends. |
+
+A few things work the same as in the dashboard:
+
+- Analyses and talent searches count against your plan's monthly allowance.
+  Repeating the same search in the same month is free.
+- When a bulk analysis would go over your allowance, the newest applicants are
+  scored first and the rest are left out.
+- Talent search never returns a candidate's email or phone. Use
+  `invite_to_apply` instead.
+- `download_cv` and `export_applicants_csv` return a link that works once and
+  expires after 15 minutes. You can open it in a browser without signing in.
+
+Things to try:
+
+- "Who are the strongest applicants for the backend role?"
+- "Score everyone who applied to the designer job."
+- "Find senior Go engineers in Dubai who can join within a month."
+- "Send me a spreadsheet of this week's applicants."
+
+<Note>
+The old SSE endpoint, `https://mcp.talentreview.ai/sse`, has been retired. If
+your connector still uses it, remove it and add `https://mcp.talentreview.ai/mcp`.
+</Note>
+
+## Candidate tools
+
+The candidate server only sees the signed-in candidate's own CV. Every edit is
+saved as a new version, so nothing is overwritten.
+
+| Tool | What it does |
+| --- | --- |
+| `list_my_resumes` | Your CV types and every saved version, marking the active one. |
+| `get_my_resume` | One CV version as structured JSON. Defaults to the active CV. |
+| `update_my_resume` | Save an edited CV as a new version. Sections you leave out are copied unchanged. |
+| `set_active_resume` | Make a saved version the active CV. |
+| `download_my_resume_pdf` | Link to a CV version as a PDF. Works once and expires after 15 minutes. |
+
+Things to try: "Read my CV and tighten the summary", or "Add my new job at
+Acme and make it the active version".
